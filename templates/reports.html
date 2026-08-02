@@ -1,0 +1,93 @@
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports - CampusOS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="brand">🎓 CampusOS</div>
+            <ul class="nav-menu">
+                <li class="nav-item"><a href="/admin/dashboard">📊 Dashboard</a></li>
+                <li class="nav-item"><a href="/admin/clubs">🏛️ Clubs</a></li>
+                <li class="nav-item"><a href="/admin/events">📅 Events</a></li>
+                <li class="nav-item"><a href="/admin/students">👨‍🎓 Students</a></li>
+                <li class="nav-item"><a href="/admin/clubheads">👑 Club Heads</a></li>
+                <li class="nav-item"><a href="/admin/sponsors">💼 Sponsors</a></li>
+                <li class="nav-item active"><a href="/admin/reports">📄 Reports</a></li>
+            </ul>
+        </div>
+
+        <div class="main-wrapper">
+            <header>
+                <div>
+                    <button class="btn btn-secondary" onclick="goBack()">⬅ Back</button>
+                    <button class="btn btn-secondary" onclick="location.href='/admin/dashboard'">🏠 Dashboard</button>
+                </div>
+                <button class="btn btn-danger" onclick="logout()">🚪 Logout</button>
+            </header>
+
+            <div class="content-area">
+                <h2>📄 Master Excel Reports Generator</h2>
+                <p style="color:var(--text-muted); margin-bottom:25px;">Export dynamically formatted Excel (.xlsx) spreadsheets powered by openpyxl.</p>
+
+                <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px;">
+                    <div class="card">
+                        <h4>Student Directory Report</h4>
+                        <p style="font-size:12px; color:var(--text-muted); margin:10px 0;">All student roll numbers, departments, emails.</p>
+                        <a href="/api/reports/download/students" class="btn btn-primary" style="text-decoration:none;">📥 Download Students_Report.xlsx</a>
+                    </div>
+
+                    <div class="card">
+                        <h4>Clubs Summary Report</h4>
+                        <p style="font-size:12px; color:var(--text-muted); margin:10px 0;">All registered campus clubs & establishment years.</p>
+                        <a href="/api/reports/download/clubs" class="btn btn-primary" style="text-decoration:none;">📥 Download Clubs_Report.xlsx</a>
+                    </div>
+
+                    <div class="card">
+                        <h4>Events Participation Report</h4>
+                        <p style="font-size:12px; color:var(--text-muted); margin:10px 0;">Event dates, venues, capacities, and fees.</p>
+                        <a href="/api/reports/download/events" class="btn btn-primary" style="text-decoration:none;">📥 Download Events_Report.xlsx</a>
+                    </div>
+
+                    <div class="card">
+                        <h4>Sponsors Report</h4>
+                        <p style="font-size:12px; color:var(--text-muted); margin:10px 0;">Sponsorship amounts and company contacts.</p>
+                        <a href="/api/reports/download/sponsors" class="btn btn-primary" style="text-decoration:none;">📥 Download Sponsors_Report.xlsx</a>
+                    </div>
+
+                    <div class="card" style="grid-column: 1 / -1; background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border: 1px solid var(--accent);">
+                        <h4 style="color:var(--accent);">Full CampusOS Master Report</h4>
+                        <p style="font-size:13px; color:var(--text-muted); margin:10px 0;">Complete summary of all system metrics in a single report.</p>
+                        <a href="/api/reports/download/full" class="btn btn-success" style="text-decoration:none;">📊 Download CampusOS_Report.xlsx</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html> -->
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reports - CampusOS</title>
+    <script>window.location.href = '/admin/dashboard';</script>
+</head>
+<body></body>
+</html>

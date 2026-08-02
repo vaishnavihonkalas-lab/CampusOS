@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard - CampusOS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/admin.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- SIDEBAR -->
+        <div class="sidebar">
+            <div class="brand">🎓 CampusOS</div>
+            <ul class="nav-menu">
+                <li class="nav-item active"><a onclick="navigateAdminSection('overview', this)">📊 Overview</a></li>
+                <li class="nav-item"><a onclick="navigateAdminSection('clubs', this)">🏛️ Clubs</a></li>
+                <li class="nav-item"><a onclick="navigateAdminSection('students', this)">👨‍🎓 Students</a></li>
+                <li class="nav-item"><a onclick="navigateAdminSection('clubheads', this)">👑 Club Heads</a></li>
+                <li class="nav-item"><a onclick="navigateAdminSection('events', this)">📅 Events</a></li>
+                <li class="nav-item"><a onclick="navigateAdminSection('sponsors', this)">💼 Sponsors</a></li>
+                <li class="nav-item"><a onclick="navigateAdminSection('reports', this)">📄 Reports</a></li>
+                <li class="nav-item"><a onclick="navigateAdminSection('settings', this)">⚙️ Settings</a></li>
+                <li class="nav-item"><a onclick="navigateAdminSection('audit', this)">📜 Audit Logs</a></li>
+            </ul>
+        </div>
+
+        <!-- MAIN CONTENT WRAPPER -->
+        <div class="main-wrapper">
+            <header>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn btn-secondary btn-sm" onclick="goBack()">← Back</button>
+                    <button class="btn btn-secondary btn-sm" onclick="location.reload()">🏠 Dashboard</button>
+                </div>
+
+                <div style="display:flex; align-items:center; gap:15px;">
+                    <div class="profile-chip">
+                        <img id="admin-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="Avatar">
+                        <span id="admin-name-display" class="admin-title">Super Admin</span>
+                    </div>
+                    <button class="btn btn-danger btn-sm" onclick="logout()">🚪 Logout</button>
+                </div>
+            </header>
+
+            <div class="content-area">
+
+                <!-- SECTION 1: OVERVIEW -->
+                <section id="sec-overview" class="admin-section active">
+                    <h2>👑 Super Admin Master Dashboard</h2>
+
+                    <!-- STATS METRICS -->
+                    <div class="cards-grid" style="margin-top:20px;">
+                        <div class="card" onclick="navigateAdminSection('clubs')"><h4>Total Clubs</h4><div class="value" id="ad-clubs">0</div></div>
+                        <div class="card" onclick="navigateAdminSection('students')"><h4>Total Students</h4><div class="value" id="ad-students">0</div></div>
+                        <div class="card" onclick="navigateAdminSection('clubheads')"><h4>Club Heads</h4><div class="value" id="ad-heads">0</div></div>
+                        <div class="card" onclick="navigateAdminSection('events')"><h4>Total Events</h4><div class="value" id="ad-events">0</div></div>
+                        <div class="card"><h4>Upcoming Events</h4><div class="value" id="ad-upcoming">0</div></div>
+                        <div class="card" onclick="navigateAdminSection('sponsors')"><h4>Sponsorship Raised</h4><div class="value" id="ad-sponsors">$0</div></div>
+                        <div class="card"><h4>Registrations</h4><div class="value" id="ad-regs">0</div></div>
+                        <div class="card"><h4>Certificates Issued</h4><div class="value" id="ad-certs">0</div></div>
+                    </div>
+
+                    <!-- QUICK ACTIONS BAR -->
+                    <div class="card-box" style="margin-bottom:25px;">
+                        <h3>⚡ Quick Actions</h3>
+                        <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:12px;">
+                            <button class="btn btn-primary" onclick="openModal('create-club-modal')">🏛️ Add Club</button>
+                            <button class="btn btn-secondary" onclick="openModal('create-student-modal')">👨‍🎓 Add Student</button>
+                            <button class="btn btn-secondary" onclick="openModal('create-event-modal')">📅 Create Event</button>
+                            <button class="btn btn-secondary" onclick="exportReportExcel('full')">📊 Export Full Report</button>
+                            <button class="btn btn-secondary" onclick="triggerBackup()">💾 Backup Database</button>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <!-- RECENT ACTIVITY LOGS -->
+                        <div class="card-box">
+                            <h3>📜 Recent System Activity</h3>
+                            <div id="recent-activity-list" style="margin-top:12px;"></div>
+                        </div>
+
+                        <!-- SYSTEM HEALTH -->
+                        <div class="card-box">
+                            <h3>🖥️ System Health & Status</h3>
+                            <div style="margin-top:12px; font-size:13px; line-height:2;">
+                                <p><strong>Database Status:</strong> <span class="badge badge-success">Online (MySQL Connected)</span></p>
+                                <p><strong>Flask API Status:</strong> <span class="badge badge-success">Active (Port 5000)</span></p>
+                                <p><strong>Storage Engine:</strong> InnoDB Normalized</p>
+                                <p><strong>Academic Session:</strong> 2026-2027</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CHARTS -->
+                    <div class="grid-2" style="margin-top:20px;">
+                        <div class="card-box">
+                            <h3>📈 Event Registrations Trend</h3>
+                            <canvas id="eventRegsChart" style="max-height:220px;"></canvas>
+                        </div>
+                        <div class="card-box">
+                            <h3>📊 Club Membership Distribution</h3>
+                            <canvas id="clubMembersChart" style="max-height:220px;"></canvas>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: CLUBS -->
+                <section id="sec-clubs" class="admin-section">
+                    <div class="card-box">
+                        <div class="box-header">
+                            <h3>🏛️ Campus Clubs Management</h3>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" placeholder="Search clubs..." onkeyup="filterTable('clubs-tbl', this.value)" class="search-input">
+                                <button class="btn btn-primary btn-sm" onclick="openModal('create-club-modal')">➕ Add Club</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="clubs-tbl">
+                                <thead>
+                                    <tr><th>Club Name</th><th>Category</th><th>Faculty Coordinator</th><th>Club Head</th><th>Members</th><th>Events</th><th>Status</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="clubs-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: STUDENTS -->
+                <section id="sec-students" class="admin-section">
+                    <div class="card-box">
+                        <div class="box-header">
+                            <h3>👨‍🎓 Students Directory</h3>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" placeholder="Search students..." onkeyup="filterTable('students-tbl', this.value)" class="search-input">
+                                <button class="btn btn-primary btn-sm" onclick="openModal('create-student-modal')">➕ Add Student</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="students-tbl">
+                                <thead>
+                                    <tr><th>Roll No</th><th>Name</th><th>Department</th><th>Year</th><th>Email</th><th>Phone</th><th>Registrations</th><th>Status</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="students-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 4: CLUB HEADS -->
+                <section id="sec-clubheads" class="admin-section">
+                    <div class="card-box">
+                        <div class="box-header">
+                            <h3>👑 Club Heads Directory</h3>
+                            <input type="text" placeholder="Search heads..." onkeyup="filterTable('clubheads-tbl', this.value)" class="search-input">
+                        </div>
+                        <div class="table-responsive">
+                            <table id="clubheads-tbl">
+                                <thead>
+                                    <tr><th>Name</th><th>Assigned Club</th><th>Email</th><th>Phone</th><th>Assigned Date</th><th>Status</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="clubheads-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 5: EVENTS -->
+                <section id="sec-events" class="admin-section">
+                    <div class="card-box">
+                        <div class="box-header">
+                            <h3>📅 Campus Events Management</h3>
+                            <div style="display:flex; gap:10px;">
+                                <input type="text" placeholder="Search events..." onkeyup="filterTable('events-tbl', this.value)" class="search-input">
+                                <button class="btn btn-primary btn-sm" onclick="openModal('create-event-modal')">➕ Create Event</button>
+                            </div>
+                        </div>
+                        <div class="table-responsive">
+                            <table id="events-tbl">
+                                <thead>
+                                    <tr><th>Title</th><th>Club</th><th>Venue</th><th>Date</th><th>Fee</th><th>Registrations</th><th>Status</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="events-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 6: SPONSORS -->
+                <section id="sec-sponsors" class="admin-section">
+                    <div class="card-box">
+                        <div class="box-header">
+                            <h3>💼 Corporate Sponsors</h3>
+                            <input type="text" placeholder="Search sponsors..." onkeyup="filterTable('sponsors-tbl', this.value)" class="search-input">
+                        </div>
+                        <div class="table-responsive">
+                            <table id="sponsors-tbl">
+                                <thead>
+                                    <tr><th>Sponsor Name</th><th>Company</th><th>Amount ($)</th><th>Contact Person</th><th>Assigned Club</th><th>Status</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="sponsors-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 7: REPORTS -->
+                <section id="sec-reports" class="admin-section">
+                    <div class="card-box">
+                        <h3>📄 Dynamic Excel Reports Generator</h3>
+                        <p style="color:var(--text-muted); margin:10px 0 25px;">Export dynamically populated Excel spreadsheets powered by openpyxl.</p>
+
+                        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:20px;">
+                            <div class="card">
+                                <h4>Students Report</h4>
+                                <p style="font-size:12px; color:var(--text-muted); margin:8px 0 15px;">All student directories and emails.</p>
+                                <button class="btn btn-primary btn-sm" onclick="exportReportExcel('students')">📥 Export Excel</button>
+                            </div>
+
+                            <div class="card">
+                                <h4>Clubs Report</h4>
+                                <p style="font-size:12px; color:var(--text-muted); margin:8px 0 15px;">Active campus clubs summary.</p>
+                                <button class="btn btn-primary btn-sm" onclick="exportReportExcel('clubs')">📥 Export Excel</button>
+                            </div>
+
+                            <div class="card">
+                                <h4>Events Report</h4>
+                                <p style="font-size:12px; color:var(--text-muted); margin:8px 0 15px;">Event dates, venues, and capacities.</p>
+                                <button class="btn btn-primary btn-sm" onclick="exportReportExcel('events')">📥 Export Excel</button>
+                            </div>
+
+                            <div class="card">
+                                <h4>Sponsors Report</h4>
+                                <p style="font-size:12px; color:var(--text-muted); margin:8px 0 15px;">Corporate funding breakdown.</p>
+                                <button class="btn btn-primary btn-sm" onclick="exportReportExcel('sponsors')">📥 Export Excel</button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 8: SETTINGS -->
+                <section id="sec-settings" class="admin-section">
+                    <div class="card-box" style="max-width:500px;">
+                        <h3>⚙️ System Settings</h3>
+                        <form onsubmit="handleSaveSettingsSubmit(event)" style="margin-top:15px;">
+                            <div class="form-group"><label>College Name</label><input type="text" id="edit-college-name" required></div>
+                            <div class="form-group"><label>Academic Session</label><input type="text" id="edit-academic-year" required></div>
+                            <button type="submit" class="btn btn-primary">Save Settings</button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- SECTION 9: AUDIT LOGS -->
+                <section id="sec-audit" class="admin-section">
+                    <div class="card-box">
+                        <h3>📜 System Audit Logs</h3>
+                        <div class="table-responsive" style="margin-top:15px;">
+                            <table>
+                                <thead>
+                                    <tr><th>User</th><th>Action Performed</th><th>Module</th><th>IP Address</th><th>Timestamp</th></tr>
+                                </thead>
+                                <tbody id="audit-logs-list"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE CLUB -->
+    <div id="create-club-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Add New Club</h3>
+            <form onsubmit="handleCreateClubSubmit(event)">
+                <div class="form-group"><label>Club Name</label><input type="text" id="c-name" required></div>
+                <div class="form-group"><label>Category</label><input type="text" id="c-cat" required></div>
+                <div class="form-group"><label>Faculty Coordinator</label><input type="text" id="c-coord" value="Dr. S. K. Sharma" required></div>
+                <div class="form-group"><label>Established Year</label><input type="number" id="c-year" value="2026" required></div>
+                <div class="form-group"><label>Description</label><textarea id="c-desc"></textarea></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-club-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Club</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE STUDENT -->
+    <div id="create-student-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Register Student</h3>
+            <form onsubmit="handleCreateStudentSubmit(event)">
+                <div class="form-group"><label>Full Name</label><input type="text" id="st-name" required></div>
+                <div class="form-group"><label>Roll Number</label><input type="text" id="st-roll" required></div>
+                <div class="form-group"><label>Department</label><input type="text" id="st-dept" required></div>
+                <div class="form-group"><label>Year</label><input type="text" id="st-year" required></div>
+                <div class="form-group"><label>Email Address</label><input type="email" id="st-email" required></div>
+                <div class="form-group"><label>Phone Number</label><input type="text" id="st-phone"></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-student-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Register Student</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE EVENT -->
+    <div id="create-event-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Create Event</h3>
+            <form onsubmit="handleCreateEventSubmit(event)">
+                <div class="form-group"><label>Event Title</label><input type="text" id="ev-title" required></div>
+                <div class="form-group"><label>Club ID</label><input type="number" id="ev-club" value="1" required></div>
+                <div class="form-group"><label>Venue</label><input type="text" id="ev-venue" required></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div class="form-group"><label>Date</label><input type="date" id="ev-date" required></div>
+                    <div class="form-group"><label>Time</label><input type="text" id="ev-time" value="10:00 AM" required></div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div class="form-group"><label>Fee ($)</label><input type="number" id="ev-fee" value="0"></div>
+                    <div class="form-group"><label>Capacity</label><input type="number" id="ev-cap" value="100"></div>
+                </div>
+                <div class="form-group"><label>Description</label><textarea id="ev-desc"></textarea></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-event-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: REGISTRATIONS -->
+    <div id="registrations-modal" class="modal-overlay">
+        <div class="modal-box" style="width:700px;">
+            <div class="box-header">
+                <h3 id="reg-modal-title">Event Registrations</h3>
+                <button class="btn btn-secondary btn-sm" onclick="closeModal('registrations-modal')">✖ Close</button>
+            </div>
+            <div class="table-responsive" style="margin-top:15px; max-height:350px; overflow-y:auto;">
+                <table>
+                    <thead>
+                        <tr><th>Student Name</th><th>Roll No</th><th>Department</th><th>Email</th><th>Registered At</th></tr>
+                    </thead>
+                    <tbody id="event-regs-list"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/admin.js') }}"></script>
+    <script>
+        initAdminDashboard();
+    </script>
+</body>
+</html>

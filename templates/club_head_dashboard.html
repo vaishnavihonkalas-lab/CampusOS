@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Head Dashboard - CampusOS</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/club_head.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- TOP NAVBAR -->
+        <header class="top-nav">
+            <div class="nav-left">
+                <button class="btn btn-secondary btn-sm" onclick="goBack()">← Back</button>
+                <button class="btn btn-secondary btn-sm" onclick="location.reload()">🏠 Dashboard</button>
+                <div class="brand-title">🎓 CampusOS SaaS</div>
+            </div>
+
+            <div class="nav-right">
+                <div class="profile-chip">
+                    <img id="head-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150" alt="Avatar">
+                    <div>
+                        <div id="head-name-display" class="head-name">Club Head</div>
+                        <div id="club-name-display" class="club-tag">Loading Club...</div>
+                    </div>
+                </div>
+                <button class="btn btn-danger btn-sm" onclick="logout()">🚪 Logout</button>
+            </div>
+        </header>
+
+        <!-- DASHBOARD NAVIGATION TABS -->
+        <div class="dashboard-tabs">
+            <button class="tab-btn active" onclick="switchDashboardTab('overview', this)">📊 Overview</button>
+            <button class="tab-btn" onclick="switchDashboardTab('members', this)">👨‍🎓 Members & Requests <span id="pending-badge" class="tab-badge">0</span></button>
+            <button class="tab-btn" onclick="switchDashboardTab('events', this)">📅 Events & Attendance</button>
+            <button class="tab-btn" onclick="switchDashboardTab('sponsors', this)">💼 Sponsors</button>
+            <button class="tab-btn" onclick="switchDashboardTab('announcements', this)">📢 Announcements</button>
+            <button class="tab-btn" onclick="switchDashboardTab('gallery', this)">🖼️ Gallery</button>
+            <button class="tab-btn" onclick="switchDashboardTab('certificates', this)">📜 Certificates</button>
+            <button class="tab-btn" onclick="switchDashboardTab('settings', this)">⚙️ Settings</button>
+        </div>
+
+        <div class="main-content">
+
+            <!-- TAB 1: OVERVIEW -->
+            <section id="tab-overview" class="tab-section active">
+                <!-- STATS CARDS -->
+                <div class="cards-grid">
+                    <div class="card"><h4>TOTAL MEMBERS</h4><div class="value" id="st-members">0</div></div>
+                    <div class="card"><h4>EVENTS ORGANIZED</h4><div class="value" id="st-events">0</div></div>
+                    <div class="card"><h4>UPCOMING EVENTS</h4><div class="value" id="st-upcoming">0</div></div>
+                    <div class="card"><h4>PENDING REQUESTS</h4><div class="value" id="st-pending">0</div></div>
+                    <div class="card"><h4>SPONSORSHIP RAISED</h4><div class="value" id="st-sponsors">$0</div></div>
+                    <div class="card"><h4>CERTIFICATES ISSUED</h4><div class="value" id="st-certs">0</div></div>
+                </div>
+
+                <!-- QUICK ACTIONS -->
+                <div class="quick-actions-bar">
+                    <button class="btn btn-primary" onclick="openModal('create-event-modal')">➕ Create Event</button>
+                    <button class="btn btn-secondary" onclick="switchDashboardTab('members')">✔ Approve Members</button>
+                    <button class="btn btn-secondary" onclick="openModal('add-sponsor-modal')">💼 Add Sponsor</button>
+                    <button class="btn btn-secondary" onclick="exportMembersExcel()">📥 Export Members Excel</button>
+                    <button class="btn btn-secondary" onclick="switchDashboardTab('announcements')">📢 Post Announcement</button>
+                </div>
+
+                <div class="dashboard-grid-2">
+                    <!-- CLUB INFO CARD -->
+                    <div class="card-box">
+                        <div class="box-header">
+                            <h3>🏛️ Club Information</h3>
+                            <button class="btn btn-secondary btn-sm" onclick="openEditClubModal()">✏️ Edit Info</button>
+                        </div>
+                        <div class="club-info-body">
+                            <p><strong>Name:</strong> <span id="info-club-name">-</span></p>
+                            <p><strong>Category:</strong> <span id="info-category">-</span></p>
+                            <p><strong>Faculty Coordinator:</strong> <span id="info-coordinator">-</span></p>
+                            <p><strong>Est. Year:</strong> <span id="info-year">-</span></p>
+                            <p><strong>Description:</strong> <span id="info-description">-</span></p>
+                        </div>
+                    </div>
+
+                    <!-- NOTIFICATIONS PANEL -->
+                    <div class="card-box">
+                        <div class="box-header">
+                            <h3>🔔 System Notifications</h3>
+                        </div>
+                        <div id="notif-list" class="notif-panel-list">
+                            <div class="empty-msg">No notifications</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANALYTICS CHARTS -->
+                <div class="dashboard-grid-2" style="margin-top:20px;">
+                    <div class="card-box">
+                        <h3>📈 Event Registrations Analysis</h3>
+                        <canvas id="registrationsChart" style="max-height:220px;"></canvas>
+                    </div>
+                    <div class="card-box">
+                        <h3>📊 Member Growth Trends</h3>
+                        <canvas id="membersChart" style="max-height:220px;"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: MEMBERS & REQUESTS -->
+            <section id="tab-members" class="tab-section">
+                <!-- PENDING JOIN REQUESTS -->
+                <div class="card-box" style="margin-bottom:25px;">
+                    <div class="box-header">
+                        <h3>📥 Pending Join Requests</h3>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Student Name</th><th>Department</th><th>Year</th><th>Reason</th><th>Request Date</th><th>Actions</th></tr>
+                            </thead>
+                            <tbody id="join-requests-tbl">
+                                <tr><td colspan="6" class="empty-msg">No pending requests</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- MEMBERS DIRECTORY -->
+                <div class="card-box">
+                    <div class="box-header">
+                        <h3>👨‍🎓 Official Club Members</h3>
+                        <div style="display:flex; gap:10px;">
+                            <input type="text" placeholder="Search members..." onkeyup="filterTable('members-tbl', this.value)" class="search-input">
+                            <button class="btn btn-secondary btn-sm" onclick="exportMembersExcel()">📥 Export Excel</button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="members-tbl">
+                            <thead>
+                                <tr><th>Roll No</th><th>Name</th><th>Department</th><th>Year</th><th>Email</th><th>Phone</th><th>Status</th><th>Joined Date</th><th>Action</th></tr>
+                            </thead>
+                            <tbody id="members-list">
+                                <tr><td colspan="9" class="empty-msg">No members found</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: EVENTS & ATTENDANCE -->
+            <section id="tab-events" class="tab-section">
+                <div class="card-box">
+                    <div class="box-header">
+                        <h3>📅 Organized Events</h3>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('create-event-modal')">➕ Create Event</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Title</th><th>Venue</th><th>Date</th><th>Time</th><th>Fee</th><th>Registrations</th><th>Action</th></tr>
+                            </thead>
+                            <tbody id="events-list">
+                                <tr><td colspan="7" class="empty-msg">No events found</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 4: SPONSORS -->
+            <section id="tab-sponsors" class="tab-section">
+                <div class="card-box">
+                    <div class="box-header">
+                        <h3>💼 Sponsor Directory</h3>
+                        <button class="btn btn-primary btn-sm" onclick="openModal('add-sponsor-modal')">➕ Add Sponsor</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Name</th><th>Company</th><th>Amount ($)</th><th>Contact Person</th><th>Phone</th><th>Email</th><th>Action</th></tr>
+                            </thead>
+                            <tbody id="sponsors-list">
+                                <tr><td colspan="7" class="empty-msg">No sponsors found</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 5: ANNOUNCEMENTS -->
+            <section id="tab-announcements" class="tab-section">
+                <div class="card-box" style="margin-bottom:20px;">
+                    <h3>📢 Post New Announcement</h3>
+                    <form onsubmit="handlePostAnnouncement(event)" style="margin-top:15px;">
+                        <div class="form-group"><label>Announcement Title</label><input type="text" id="anc-title" required></div>
+                        <div class="form-group"><label>Description / Details</label><textarea id="anc-desc" required></textarea></div>
+                        <button type="submit" class="btn btn-primary">Post Announcement</button>
+                    </form>
+                </div>
+
+                <div class="card-box">
+                    <h3>📜 Previous Announcements</h3>
+                    <div id="announcements-history-list" style="margin-top:15px;"></div>
+                </div>
+            </section>
+
+            <!-- TAB 6: GALLERY -->
+            <section id="tab-gallery" class="tab-section">
+                <div class="card-box" style="margin-bottom:20px;">
+                    <h3>🖼️ Upload Image / Poster</h3>
+                    <form onsubmit="handleUploadGallery(event)" style="display:flex; gap:10px; margin-top:15px;">
+                        <input type="url" id="gal-url" placeholder="Image URL (https://...)" required style="flex:2;">
+                        <input type="text" id="gal-caption" placeholder="Caption" required style="flex:1;">
+                        <button type="submit" class="btn btn-primary">Upload</button>
+                    </form>
+                </div>
+
+                <div id="gallery-grid" class="gallery-grid"></div>
+            </section>
+
+            <!-- TAB 7: CERTIFICATES -->
+            <section id="tab-certificates" class="tab-section">
+                <div class="card-box">
+                    <h3>📜 Issued Event Certificates</h3>
+                    <div class="table-responsive" style="margin-top:15px;">
+                        <table>
+                            <thead>
+                                <tr><th>Certificate Code</th><th>Student Name</th><th>Roll No</th><th>Event Title</th><th>Issued Date</th></tr>
+                            </thead>
+                            <tbody id="certificates-list">
+                                <tr><td colspan="5" class="empty-msg">No certificates issued</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 8: SETTINGS -->
+            <section id="tab-settings" class="tab-section">
+                <div class="card-box" style="max-width:500px;">
+                    <h3>⚙️ Club Head Profile Settings</h3>
+                    <form onsubmit="handleUpdateProfile(event)" style="margin-top:15px;">
+                        <div class="form-group"><label>Full Name</label><input type="text" id="prof-name" required></div>
+                        <div class="form-group"><label>Email Address</label><input type="email" id="prof-email" required></div>
+                        <div class="form-group"><label>Phone Number</label><input type="text" id="prof-phone" required></div>
+                        <div class="form-group"><label>Password</label><input type="password" id="prof-pass" required></div>
+                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                    </form>
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!-- MODAL: EDIT CLUB DETAILS -->
+    <div id="edit-club-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Edit Club Details</h3>
+            <form onsubmit="handleSaveClubInfo(event)">
+                <div class="form-group"><label>Faculty Coordinator</label><input type="text" id="edit-coord" required></div>
+                <div class="form-group"><label>Established Year</label><input type="number" id="edit-year" required></div>
+                <div class="form-group"><label>Club Description</label><textarea id="edit-desc" required></textarea></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('edit-club-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREATE EVENT -->
+    <div id="create-event-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Create New Event</h3>
+            <form onsubmit="handleCreateEvent(event)">
+                <div class="form-group"><label>Event Title</label><input type="text" id="ev-title" required></div>
+                <div class="form-group"><label>Venue</label><input type="text" id="ev-venue" required></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div class="form-group"><label>Date</label><input type="date" id="ev-date" required></div>
+                    <div class="form-group"><label>Time</label><input type="text" id="ev-time" value="10:00 AM" required></div>
+                </div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div class="form-group"><label>Fee ($)</label><input type="number" id="ev-fee" value="0"></div>
+                    <div class="form-group"><label>Capacity</label><input type="number" id="ev-cap" value="100"></div>
+                </div>
+                <div class="form-group"><label>Description</label><textarea id="ev-desc"></textarea></div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('create-event-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ADD SPONSOR -->
+    <div id="add-sponsor-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3>Add New Sponsor</h3>
+            <form onsubmit="handleAddSponsor(event)">
+                <div class="form-group"><label>Sponsor Name</label><input type="text" id="sp-name" required></div>
+                <div class="form-group"><label>Company</label><input type="text" id="sp-comp" required></div>
+                <div class="form-group"><label>Amount ($)</label><input type="number" id="sp-amount" required></div>
+                <div class="form-group"><label>Contact Person</label><input type="text" id="sp-contact"></div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div class="form-group"><label>Phone</label><input type="text" id="sp-phone"></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="sp-email"></div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('add-sponsor-modal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Sponsor</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: EVENT REGISTRATIONS & ATTENDANCE -->
+    <div id="registrations-modal" class="modal-overlay">
+        <div class="modal-box" style="width:700px; max-width:90vw;">
+            <div class="box-header">
+                <h3 id="reg-modal-title">Event Registrations</h3>
+                <button class="btn btn-secondary btn-sm" onclick="closeModal('registrations-modal')">✖ Close</button>
+            </div>
+            <div class="table-responsive" style="margin-top:15px; max-height:350px; overflow-y:auto;">
+                <table>
+                    <thead>
+                        <tr><th>Student Name</th><th>Roll No</th><th>Department</th><th>Mark Attendance</th><th>Action</th></tr>
+                    </thead>
+                    <tbody id="event-regs-list">
+                        <tr><td colspan="5" class="empty-msg">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/club_head.js') }}"></script>
+    <script>
+        initClubHeadDashboard();
+    </script>
+</body>
+</html>
