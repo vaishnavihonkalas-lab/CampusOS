@@ -44,6 +44,8 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools platforms;android-35 build-tools;35.0.0
       - run: unzip -q CampusOS-Android.zip -d android
       - run: chmod +x android/gradlew
       - uses: gradle/actions/setup-gradle@v4
