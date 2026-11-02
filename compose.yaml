@@ -2,19 +2,30 @@ services:
   db:
     image: mysql:8.4
     environment:
-      MYSQL_DATABASE: cabnect
-      MYSQL_USER: cabnect
-      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
-    ports:
-      - "127.0.0.1:${DB_PORT:-3306}:3306"
+      MYSQL_DATABASE: campusos_v2
+      MYSQL_USER: campusos
+      MYSQL_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD}
     volumes:
-      - cabnect_db:/var/lib/mysql
-      - ./database/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
+      - campus_data:/var/lib/mysql
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/001-schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 --silent"]
       interval: 5s
       timeout: 5s
       retries: 30
+  api:
+    build: ./backend
+    ports: ["5000:5000"]
+    environment:
+      DB_HOST: db
+      DB_USER: campusos
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
+      DB_NAME: campusos_v2
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET}
+      PORT: 5000
+    depends_on:
+      db:
+        condition: service_healthy
 volumes:
-  cabnect_db:
+  campus_data:

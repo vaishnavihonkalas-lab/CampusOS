@@ -14,7 +14,7 @@ app = Flask(__name__)
 MYSQL_CONFIG = {
     'host': 'localhost',
     'user': 'root',
-    'password': 'Vai_shn@vi1234',  # Your MySQL Password
+    'password': os.environ.get('DB_PASSWORD', ''),  # Your MySQL Password
     'database': 'campusos_db'
 }
 
