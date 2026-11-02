@@ -1,0 +1,25 @@
+{
+  "name": "campusos-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Campus clubs and events API",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/server.js",
+    "db:setup": "node --env-file-if-exists=.env scripts/setup.js",
+    "admin:create": "node --env-file-if-exists=.env scripts/admin.js",
+    "test": "node --test test/*.test.js",
+    "test:integration": "node --env-file-if-exists=.env --test test/integration.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0",
+    "mysql2": "^3.14.0",
+    "bcrypt": "^6.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "helmet": "^8.1.0",
+    "express-rate-limit": "^8.1.0"
+  }
+}
