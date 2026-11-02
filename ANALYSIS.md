@@ -19,4 +19,4 @@ The existing GitHub repository was a separate Flask/MySQL web implementation. It
 - Browser demonstration client, backend tests, Docker configuration, deployment documentation and CI definitions.
 
 ## Verification limits
-Backend core and database integration checks passed. Android APK compilation, emulator/device behaviour, hosted deployment and GitHub Actions results must be verified separately; see TEST_RESULTS.md. The code does not claim university SSO, real payments or store distribution.
+Backend core and database integration checks passed on MariaDB locally and MySQL 8.4 in GitHub Actions. The debug Android APK compiled and Android unit tests passed in GitHub Actions. Emulator/device behaviour and hosted deployment still require verification; see TEST_RESULTS.md. The code does not claim university SSO, real payments or store distribution.

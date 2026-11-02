@@ -34,12 +34,12 @@ The default debug URL is `http://10.0.2.2:5000/` for the Android emulator. On a 
 
 Debug builds permit local HTTP. Release builds require HTTPS. Tokens are stored using Android Keystore-backed AES-GCM; backup is disabled. Login role comes from the server. Signing keys and production passwords are intentionally not included.
 
-Build: `./gradlew assembleDebug testDebugUnitTest`. For a preconfigured endpoint use `./gradlew assembleDebug -PAPI_BASE_URL=https://your-api-host/`. Check the Android CI job before treating an APK as verified. No emulator/device run has been completed here.
+Build: `./gradlew assembleDebug testDebugUnitTest`. For a preconfigured endpoint use `./gradlew assembleDebug -PAPI_BASE_URL=https://your-api-host/`. The Android CI build and unit tests passed in run 41419979425, which produced a debug APK artifact. No emulator/device run has been completed here.
 
 ## Tests
 In `backend/`: `npm test` runs core validation/auth/transaction checks. `npm run test:integration` requires TEST_DB_USER / TEST_DB_PASSWORD with temporary database CREATE/DROP privileges. It creates and drops only its randomly named test database. Never run tests with production credentials.
 
-Integration has been run against MariaDB 10.11.14. The GitHub workflow also defines a MySQL 8.4 job and an Android APK build; their results must be checked after upload. See TEST_RESULTS.md.
+Integration has been run against MariaDB 10.11.14. The GitHub workflow passed its MySQL 8.4 backend checks and Android APK/unit-test build. See TEST_RESULTS.md.
 
 ## Security and boundaries
 - Public signup creates only students. JWTs are HMAC-signed, short-lived and checked against the user's current token version.
