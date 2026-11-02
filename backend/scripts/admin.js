@@ -1,0 +1,2 @@
+const db=require('../src/db'),bcrypt=require('bcrypt'),v=require('../src/validation');
+(async()=>{try{const name=v.text(process.env.ADMIN_NAME,'Admin name',120),email=v.email(process.env.ADMIN_EMAIL),hash=await bcrypt.hash(v.password(process.env.ADMIN_PASSWORD),10);await db.query("INSERT INTO users (name,email,password_hash,role) VALUES (?,?,?,'admin')",[name,email,hash]);console.log('Administrator created. Remove ADMIN_PASSWORD from the environment.');}finally{await db.end();}})().catch(e=>{console.error(e.code||e.message);process.exitCode=1;});
